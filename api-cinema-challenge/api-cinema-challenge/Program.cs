@@ -10,6 +10,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<CinemaContext>();
 builder.Services.AddScoped<IRepository<Movie>, Repository<Movie>>();
+builder.Services.AddScoped<IRepository<Ticket>, Repository<Ticket>>();
+builder.Services.AddScoped<IRepository<Customer>, Repository<Customer>>();
+builder.Services.AddScoped<IRepository<MovieOnScreen>, Repository<MovieOnScreen>>();
+builder.Services.AddScoped<IRepository<Screen>, Repository<Screen>>();
 
 var app = builder.Build();
 

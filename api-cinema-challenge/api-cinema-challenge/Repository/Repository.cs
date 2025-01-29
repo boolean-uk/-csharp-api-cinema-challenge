@@ -21,7 +21,5 @@ namespace api_cinema_challenge.Repository
             List<T> movies = _table.ToList();
             return movies;
         }
-        
-
     }
 }

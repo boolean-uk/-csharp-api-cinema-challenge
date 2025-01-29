@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop.Infrastructure;
 using Newtonsoft.Json.Linq;
 
+
 namespace api_cinema_challenge.Data
 {
     public class CinemaContext : DbContext
@@ -20,7 +21,7 @@ namespace api_cinema_challenge.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(_connectionString);
-            //optionsBuilder.UseLazyLoadingProxies();
+            optionsBuilder.UseLazyLoadingProxies();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -83,7 +84,7 @@ namespace api_cinema_challenge.Data
                 .HasData(
                 new List<Movie>
                 {
-                    new Movie { movieId=1 ,Title = "the hobbit", CreatedAt =DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) ,Rating = "10",Description= "a lonely hobbit travels the world together with his trusty friends gollum and sauron", RuntimeMins="120"}
+                    new Movie { movieId=1 ,Title = "the hobbit",  CreatedAt =DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) ,Rating = "10",Description= "a lonely hobbit travels the world together with his trusty friends gollum and sauron", RuntimeMins="120"}
                 }
                 );
             modelBuilder.Entity<Customer>()

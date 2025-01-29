@@ -21,8 +21,8 @@ namespace api_cinema_challenge.Models
         public DateTime CreatedAt { get; set; }
         [Column("UpdatedAt")]
         public DateTime UpdatedAt { get; set; }
-        [Column("moviesOnScreens")]
-        public List<MovieOnScreen> moviesOnScreens { get; set; } 
+        [NotMapped]
+        public virtual List<MovieOnScreen> moviesOnScreens { get; set; } 
         
     }
 }

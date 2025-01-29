@@ -19,8 +19,8 @@ namespace api_cinema_challenge.Models
         public DateTime CreatedAt { get; set; }
         [Column("UpdatedAt")]
         public DateTime UpdatedAt { get; set; }
-        [Column("tickets")]
-        public List<Ticket> tickets { get; set; } = new List<Ticket>();
+        [NotMapped]
+        public virtual List<Ticket> tickets { get; set; } = new List<Ticket>();
         [NotMapped]
         public int ticketId { get; set; }
 

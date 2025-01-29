@@ -20,8 +20,8 @@ namespace api_cinema_challenge.Models
         [Column("UpdatedAt")]
         public DateTime updatedAt { get; set; }
         [Column("tickets")]
-        public List<Ticket> tickets { get; set; }
-        [Column("movies")]
-        public List<MovieOnScreen> moviesOnScreen { get; set; }
+        public virtual List<Ticket> tickets { get; set; }
+        [NotMapped]
+        public virtual List<MovieOnScreen> moviesOnScreen { get; set; }
     }
 }

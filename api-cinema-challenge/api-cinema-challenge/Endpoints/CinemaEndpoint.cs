@@ -187,8 +187,8 @@ namespace api_cinema_challenge.Endpoints
 
             Ticket ticket = new Ticket { customerID = customerId, screenId = screenId };
             repo.Insert(ticket);
-            //repo.Save();
-            return TypedResults.Ok(new TicketDTO(ticket));
+            repo.Save();
+            return TypedResults.Ok();
 
 
 
@@ -225,14 +225,10 @@ namespace api_cinema_challenge.Endpoints
         {
             try
             {
-                Screen screen = new Screen();
-                screen.capacity = capacity;
-                screen.screenNumber = screenNumber;
-                screen.startsAt = startsAt;
-                screen.movieId = movieId;
+                Screen screen = new Screen { capacity = capacity, movieId = movieId, createdAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc).ToString(), screenNumber = screenNumber, startsAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc).ToString(), updatedAt = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc).ToString() };
                 repo.Insert(screen);
                 repo.Save();
-                return TypedResults.Ok(new ScreenDTO(screen));
+                return TypedResults.Ok();
             }
             catch (Exception e)
             {

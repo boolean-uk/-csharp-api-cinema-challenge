@@ -53,7 +53,8 @@ namespace api_cinema_challenge.Data
 
             modelBuilder.Entity<Ticket>()
                 .HasOne(a => a.screen)
-                .WithMany(a => a.tickets);
+                .WithMany(a => a.tickets)
+                .HasForeignKey(a => a.screenId);
 
             modelBuilder.Entity<Screen>()
                 .HasOne(a => a.movie)

@@ -14,14 +14,16 @@ namespace api_cinema_challenge.Models
         [Column("capacity")]
         public int capacity { get; set; }
         [Column("startsAt")]
-        public DateTime startsAt { get; set; }
+        public string startsAt { get; set; }
         [Column("createdAt")]
-        public DateTime createdAt { get; set; }
+        public string createdAt { get; set; }
         [Column("UpdatedAt")]
-        public DateTime updatedAt { get; set; }
-        [Column("tickets")]
-        public virtual List<Ticket> tickets { get; set; }
+        public string updatedAt { get; set; }
+        [Column("movieId")]
+        public int movieId{ get; set; }
         [NotMapped]
-        public virtual List<MovieOnScreen> moviesOnScreen { get; set; }
+        public virtual Movie movie{ get; set; }
+        [NotMapped]
+        public virtual List<Ticket> tickets{ get; set; }
     }
 }

@@ -8,11 +8,11 @@ namespace api_cinema_challenge.DTO
         public int screenId { get; set; }
         public int screenNumber { get; set; }
         public int capacity { get; set; }
-        public DateTime startsAt { get; set; }
-        public DateTime createdAt { get; set; }
-        public DateTime updatedAt { get; set; }
+        public string startsAt { get; set; }
+        public string createdAt { get; set; }
+        public string updatedAt { get; set; }
         public virtual List<string> tickets { get; set; }
-        public virtual List<string> movies { get; set; }
+        public virtual string movie { get; set; }
 
         public ScreenDTO(Screen screen)
         {
@@ -23,10 +23,10 @@ namespace api_cinema_challenge.DTO
             createdAt = screen.createdAt;
             updatedAt = screen.updatedAt;
             tickets = new List<string>();
-            movies = new List<string>();
+
             //convert tickets and movies to strings 
             screen.tickets.ForEach(x => tickets.Add($" ticket id : {x.ticketId}, customer: {x.customer.Name}"));
-            screen.moviesOnScreen.ForEach(x => movies.Add($" movie id {x.movieId}, movie title {x.movie.Title}"));
+            movie = $" movie id {screen.movieId}, movie title {screen.movie.Title}";
             
         }
     }

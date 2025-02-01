@@ -18,11 +18,12 @@ namespace api_cinema_challenge.Models
         [Column("RuntimeMins")]
         public string RuntimeMins { get; set; }
         [Column("CreatedAt")]
-        public DateTime CreatedAt { get; set; }
+        public string CreatedAt { get; set; }
         [Column("UpdatedAt")]
-        public DateTime UpdatedAt { get; set; }
+        public string UpdatedAt { get; set; }
         [NotMapped]
-        public virtual List<MovieOnScreen> moviesOnScreens { get; set; } 
+        public virtual List<Screen> screens { get; set; }
         
+
     }
 }

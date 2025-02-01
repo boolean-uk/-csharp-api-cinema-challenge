@@ -23,7 +23,7 @@ namespace api_cinema_challenge.DTO
             RuntimeMins = movie.RuntimeMins;
             CreatedAt = movie.CreatedAt.ToString();
             UpdatedAt = movie.UpdatedAt.ToString();
-            movie.moviesOnScreens.ForEach(x => screens.Add(x.screen.screenNumber.ToString()));
+            movie.screens.ForEach(x => screens.Add(x.screenNumber.ToString()));
         }
     }
 }

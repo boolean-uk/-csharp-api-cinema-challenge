@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace api_cinema_challenge.Models
@@ -17,6 +18,7 @@ namespace api_cinema_challenge.Models
         [Column("customerId")]
         public int customerID { get; set; }
         [NotMapped]
+ 
         public virtual Customer customer {  get; set; }   
     }
 }

@@ -16,9 +16,9 @@ namespace api_cinema_challenge.Models
         [Column("Phone")]
         public string Phone { get; set; }
         [Column("CreatedAt")]
-        public DateTime CreatedAt { get; set; }
+        public string CreatedAt { get; set; }
         [Column("UpdatedAt")]
-        public DateTime UpdatedAt { get; set; }
+        public string UpdatedAt { get; set; }
         [NotMapped]
         public virtual List<Ticket> tickets { get; set; } = new List<Ticket>();
         [NotMapped]

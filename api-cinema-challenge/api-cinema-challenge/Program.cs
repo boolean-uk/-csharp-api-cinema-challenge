@@ -1,6 +1,7 @@
 using System.Numerics;
 using api_cinema_challenge.Data;
 using api_cinema_challenge.DTO.Response;
+using api_cinema_challenge.Endpoints;
 using api_cinema_challenge.Models;
 using api_cinema_challenge.Repository;
 
@@ -25,4 +26,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.SeedCinemaApi();
+app.ConfigureCinemaAPI();
 app.Run();

@@ -4,6 +4,7 @@ using api_cinema_challenge.DTO.Response;
 using api_cinema_challenge.Models;
 using api_cinema_challenge.Repository;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Sockets;
 
 namespace api_cinema_challenge.Endpoints
 {
@@ -393,10 +394,12 @@ namespace api_cinema_challenge.Endpoints
         {
             var tickets = await ticketRepo.GetWithIncludes(t => t.Customer, t => t.Screening, t => t.Screening.Movie);
 
-            var result = tickets.Select(t => new ScreeningDTO
+            var result = tickets.Select(t => new TicketDTO
             {
                 Id = t.Id,
-                MovieName = s.Movie.Name
+                CustomerName = t.Customer.Name,
+                SceeringMovie = t.Screening.Movie.Name,
+                SceeringTime = t.Screening.Time,
             }).ToList();
             return TypedResults.Ok(result);
         }
@@ -405,16 +408,17 @@ namespace api_cinema_challenge.Endpoints
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public static async Task<IResult> GetTicketById(IRepository<Ticket> ticketRepo, int id, IMapper mapper)
         {
-            var tickets = await ticketRepo.GetWithIncludes(s => s.Movie);
-            var screening = tickets.FirstOrDefault(s => s.Id == id);
+            var tickets = await ticketRepo.GetWithIncludes(t => t.Customer, t => t.Screening, t => t.Screening.Movie);
+            var ticket = tickets.FirstOrDefault(s => s.Id == id);
 
-            if (screening == null) return TypedResults.NotFound($"No Ticket found for id {id}");
+            if (ticket == null) return TypedResults.NotFound($"No Ticket found for id {id}");
 
-            var result = new ScreeningDTO
+            var result = new TicketDTO
             {
-                Id = screening.Id,
-                Time = screening.Time,
-                MovieName = screening.Movie.Name
+                Id = ticket.Id,
+                CustomerName = ticket.Customer.Name,
+                SceeringMovie = ticket.Screening.Movie.Name,
+                SceeringTime = ticket.Screening.Time,
             };
             return TypedResults.Ok(result);
         }
@@ -423,63 +427,66 @@ namespace api_cinema_challenge.Endpoints
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static async Task<IResult> CreateTicket(IRepository<Ticket> ticketRepo, TicketPost model, IMapper mapper)
         {
-            if (model.Time == null ||
-                model.MovieId == null) return Results.BadRequest("Ticket's input was formatted wrong.");
+            if (model.CustomerId == null ||
+                model.SceeringId == null) return Results.BadRequest("Ticket's input was formatted wrong.");
 
-            var screening = new Ticket()
+            var ticket = new Ticket()
             {
-                Time = model.Time,
-                MovieId = model.MovieId
+                CustomerId = model.CustomerId,
+                SceeringId = model.SceeringId
             };
 
-            screening = await ticketRepo.Insert(screening);
+            ticket = await ticketRepo.Insert(ticket);
 
-            var result = new ScreeningDTO
+            var result = new TicketDTO
             {
-                Id = screening.Id,
-                Time = screening.Time,
-                MovieName = screening.Movie.Name
+                Id = ticket.Id,
+                CustomerName = ticket.Customer.Name,
+                SceeringMovie = ticket.Screening.Movie.Name,
+                SceeringTime = ticket.Screening.Time,
             };
-            return Results.Created($"/screenings/{screening.Id}", result);
+            return Results.Created($"/tickets/{ticket.Id}", result);
         }
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static async Task<IResult> UpdateTicket(IRepository<Ticket> ticketRepo, int id, TicketPut model, IMapper mapper)
         {
-            if (model.Time == null ||
-                model.MovieId == null) return Results.BadRequest("Ticket's input was formatted wrong.");
+            if (model.CustomerId == null ||
+                model.SceeringId == null) return Results.BadRequest("Ticket's input was formatted wrong.");
 
-            var screening = await ticketRepo.GetById(id);
-            if (screening == null) return Results.NotFound("Ticket not found");
-            if (model.Time != null) screening.Time = (DateTime)model.Time;
-            if (model.MovieId != null) screening.MovieId = (int)model.MovieId;
+            var ticket = await ticketRepo.GetById(id);
+            if (ticket == null) return Results.NotFound("Ticket not found");
+            if (model.CustomerId != null) ticket.CustomerId = (int)model.CustomerId;
+            if (model.SceeringId != null) ticket.SceeringId = (int)model.SceeringId;
 
-            screening = await ticketRepo.Update(screening);
+            ticket = await ticketRepo.Update(ticket);
 
-            var result = new ScreeningDTO
+            var result = new TicketDTO
             {
-                Id = screening.Id,
-                Time = screening.Time,
-                MovieName = screening.Movie.Name
+                Id = ticket.Id,
+                CustomerName = ticket.Customer.Name,
+                SceeringMovie = ticket.Screening.Movie.Name,
+                SceeringTime = ticket.Screening.Time,
             };
-            return Results.Created($"/screenings/{screening.Id}", result);
+            return Results.Created($"/tickets/{ticket.Id}", result);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public static async Task<IResult> DeleteTicket(IRepository<Ticket> ticketRepo, int id, IMapper mapper)
         {
-            var screening = await ticketRepo.GetById(id);
-            if (screening == null) return Results.NotFound("Ticket not found");
+            var ticket = await ticketRepo.GetById(id);
+            if (ticket == null) return Results.NotFound("Ticket not found");
 
-            screening = await ticketRepo.Delete(screening);
+            ticket = await ticketRepo.Delete(ticket);
 
-            var result = new ScreeningDTO
+            var result = new TicketDTO
             {
-                Id = screening.Id,
-                Time = screening.Time,
-                MovieName = screening.Movie.Name
+                Id = ticket.Id,
+                CustomerName = ticket.Customer.Name,
+                SceeringMovie = ticket.Screening.Movie.Name,
+                SceeringTime = ticket.Screening.Time,
             };
 
             return Results.Ok(result);

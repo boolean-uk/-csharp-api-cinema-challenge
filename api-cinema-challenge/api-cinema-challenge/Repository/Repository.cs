@@ -15,9 +15,9 @@ namespace api_cinema_challenge.Repository
             _table = _db.Set<T>();
         }
 
-        public async Task<IEnumerable<T>> Get()
+        public async Task<IQueryable<T>> Get()
         {
-            return _table.ToList();
+            return _table;
         }
 
         public async Task<T> Insert(T entity)
@@ -47,7 +47,7 @@ namespace api_cinema_challenge.Repository
         {
             return _table.Find(id);
         }
-        public async Task<IQueryable<T>> GetWithIncludes(params Expression<Func<T, object>>[] includes)
+        public IQueryable<T> GetWithIncludes(params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _table;
             foreach (var include in includes)

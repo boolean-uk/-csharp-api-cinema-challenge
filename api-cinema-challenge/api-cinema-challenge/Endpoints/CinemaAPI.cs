@@ -1,9 +1,9 @@
-﻿using AutoMapper;
-using api_cinema_challenge.DTO.Request;
+﻿using api_cinema_challenge.DTO.Request;
 using api_cinema_challenge.DTO.Response;
 using api_cinema_challenge.Models;
 using api_cinema_challenge.Repository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Sockets;
 
 namespace api_cinema_challenge.Endpoints
@@ -41,9 +41,11 @@ namespace api_cinema_challenge.Endpoints
 
         // Customer
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> GetCustomers(IRepository<Customer> customerRepo, IMapper mapper)
+        public static async Task<IResult> GetCustomers(IRepository<Customer> customerRepo)
         {
-            var customers = await customerRepo.GetWithIncludes(c => c.Tickets, c => c.Tickets.Select(t => t.Screening), c => c.Tickets.Select(t => t.Screening.Movie));
+
+            var customersQuery = customerRepo.GetWithIncludes(c => c.Tickets);
+            var customers = await customersQuery.Include(c => c.Tickets).ThenInclude(t => t.Screening).ThenInclude(s => s.Movie).ToListAsync();
 
             var result = customers.Select(c => new CustomerDTO
             {
@@ -62,9 +64,11 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> GetCustomerById(IRepository<Customer> customerRepo, int id, IMapper mapper)
+        public static async Task<IResult> GetCustomerById(IRepository<Customer> customerRepo, int id)
         {
-            var customers = await customerRepo.GetWithIncludes(c => c.Tickets, c => c.Tickets.Select(t => t.Screening), c => c.Tickets.Select(t => t.Screening.Movie));
+            var customersQuery = customerRepo.GetWithIncludes(c => c.Tickets);
+            var customers = await customersQuery.Include(c => c.Tickets).ThenInclude(t => t.Screening).ThenInclude(s => s.Movie).ToListAsync();
+
             var customer = customers.FirstOrDefault(c => c.Id == id);
 
             if (customer == null) return TypedResults.NotFound($"No customer found for id {id}");
@@ -86,7 +90,7 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static async Task<IResult> CreateCustomer(IRepository<Customer> customerRepo, CustomerPost model, IMapper mapper)
+        public static async Task<IResult> CreateCustomer(IRepository<Customer> customerRepo, CustomerPost model)
         {
             if (string.IsNullOrWhiteSpace(model.Name) ||
                 string.IsNullOrWhiteSpace(model.Email)) return Results.BadRequest("Customer's input was formatted wrong.");
@@ -116,7 +120,7 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static async Task<IResult> UpdateCustomer(IRepository<Customer> customerRepo, int id, CustomerPut model, IMapper mapper)
+        public static async Task<IResult> UpdateCustomer(IRepository<Customer> customerRepo, int id, CustomerPut model)
         {
             if (string.IsNullOrWhiteSpace(model.Name) &&
                 string.IsNullOrWhiteSpace(model.Email)) return Results.BadRequest("Customer's input was formatted wrong.");
@@ -145,12 +149,12 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> DeleteCustomer(IRepository<Customer> customerRepo, int id, IMapper mapper)
+        public static async Task<IResult> DeleteCustomer(IRepository<Customer> customerRepo, int id)
         {
             var customer = await customerRepo.GetById(id);
             if (customer == null) return Results.NotFound("Customer not found");
 
-            customer = await customerRepo.Delete(customer);
+            customer = await customerRepo.Delete(id);
 
             var result = new CustomerDTO
             {
@@ -173,9 +177,9 @@ namespace api_cinema_challenge.Endpoints
 
         // Movie
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> GetMovies(IRepository<Movie> movieRepo, IMapper mapper)
+        public static async Task<IResult> GetMovies(IRepository<Movie> movieRepo)
         {
-            var movies = await movieRepo.GetWithIncludes(m => m.Screenings);
+            var movies = movieRepo.GetWithIncludes(m => m.Screenings);
 
             var result = movies.Select(c => new MovieDTO
             {
@@ -192,9 +196,9 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> GetMovieById(IRepository<Movie> movieRepo, int id, IMapper mapper)
+        public static async Task<IResult> GetMovieById(IRepository<Movie> movieRepo, int id)
         {
-            var movies = await movieRepo.GetWithIncludes(m => m.Screenings);
+            var movies = movieRepo.GetWithIncludes(m => m.Screenings);
             var movie = movies.FirstOrDefault(c => c.Id == id);
 
             if (movie == null) return TypedResults.NotFound($"No movie found for id {id}");
@@ -214,7 +218,7 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static async Task<IResult> CreateMovie(IRepository<Movie> movieRepo, MoviePost model, IMapper mapper)
+        public static async Task<IResult> CreateMovie(IRepository<Movie> movieRepo, MoviePost model)
         {
             if (string.IsNullOrWhiteSpace(model.Name)) return Results.BadRequest("Movie's input was formatted wrong.");
 
@@ -240,7 +244,7 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static async Task<IResult> UpdateMovie(IRepository<Movie> movieRepo, int id, MoviePut model, IMapper mapper)
+        public static async Task<IResult> UpdateMovie(IRepository<Movie> movieRepo, int id, MoviePut model)
         {
             if (string.IsNullOrWhiteSpace(model.Name)) return Results.BadRequest("Movie's input was formatted wrong.");
 
@@ -265,12 +269,12 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> DeleteMovie(IRepository<Movie> movieRepo, int id, IMapper mapper)
+        public static async Task<IResult> DeleteMovie(IRepository<Movie> movieRepo, int id)
         {
             var movie = await movieRepo.GetById(id);
             if (movie == null) return Results.NotFound("Movie not found");
 
-            movie = await movieRepo.Delete(movie);
+            movie = await movieRepo.Delete(id);
 
             var result = new MovieDTO
             {
@@ -289,9 +293,9 @@ namespace api_cinema_challenge.Endpoints
 
         // Screening
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> GetScreenings(IRepository<Screening> screeningRepo, IMapper mapper)
+        public static async Task<IResult> GetScreenings(IRepository<Screening> screeningRepo)
         {
-            var screenings = await screeningRepo.GetWithIncludes(s => s.Movie);
+            var screenings = screeningRepo.GetWithIncludes(s => s.Movie);
 
             var result = screenings.Select(s => new ScreeningDTO
             {
@@ -304,9 +308,9 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> GetScreeningById(IRepository<Screening> screeningRepo, int id, IMapper mapper)
+        public static async Task<IResult> GetScreeningById(IRepository<Screening> screeningRepo, int id)
         {
-            var screenings = await screeningRepo.GetWithIncludes(s => s.Movie);
+            var screenings = screeningRepo.GetWithIncludes(s => s.Movie);
             var screening = screenings.FirstOrDefault(s => s.Id == id);
 
             if (screening == null) return TypedResults.NotFound($"No Screening found for id {id}");
@@ -322,7 +326,7 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static async Task<IResult> CreateScreening(IRepository<Screening> screeningRepo, ScreeningPost model, IMapper mapper)
+        public static async Task<IResult> CreateScreening(IRepository<Screening> screeningRepo, ScreeningPost model)
         {
             if (model.Time == null ||
                 model.MovieId == null) return Results.BadRequest("Screening's input was formatted wrong.");
@@ -335,6 +339,10 @@ namespace api_cinema_challenge.Endpoints
 
             screening = await screeningRepo.Insert(screening);
 
+
+            var screenings = screeningRepo.GetWithIncludes(s => s.Movie);
+            screening = screenings.FirstOrDefault(s => s.Id == screening.Id);
+
             var result = new ScreeningDTO
             {
                 Id = screening.Id,
@@ -346,7 +354,7 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static async Task<IResult> UpdateScreening(IRepository<Screening> screeningRepo, int id, ScreeningPut model, IMapper mapper)
+        public static async Task<IResult> UpdateScreening(IRepository<Screening> screeningRepo, int id, ScreeningPut model)
         {
             if (model.Time == null ||
                 model.MovieId == null) return Results.BadRequest("Screening's input was formatted wrong.");
@@ -369,12 +377,13 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> DeleteScreening(IRepository<Screening> screeningRepo, int id, IMapper mapper)
+        public static async Task<IResult> DeleteScreening(IRepository<Screening> screeningRepo, int id)
         {
-            var screening = await screeningRepo.GetById(id);
+            var screenings = screeningRepo.GetWithIncludes(s => s.Movie);
+            var screening = screenings.FirstOrDefault(s => s.Id == id );
             if (screening == null) return Results.NotFound("Screening not found");
 
-            screening = await screeningRepo.Delete(screening);
+            await screeningRepo.Delete(id);
 
             var result = new ScreeningDTO
             {
@@ -390,10 +399,11 @@ namespace api_cinema_challenge.Endpoints
 
         // Ticket
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> GetTickets(IRepository<Ticket> ticketRepo, IMapper mapper)
+        public static async Task<IResult> GetTickets(IRepository<Ticket> ticketRepo)
         {
-            var tickets = await ticketRepo.GetWithIncludes(t => t.Customer, t => t.Screening, t => t.Screening.Movie);
-
+            var ticketsQuery = ticketRepo.GetWithIncludes(t => t.Customer);
+            var tickets = await ticketsQuery.Include(t => t.Customer).Include(t => t.Screening).ThenInclude(s => s.Movie).ToListAsync();
+            
             var result = tickets.Select(t => new TicketDTO
             {
                 Id = t.Id,
@@ -406,9 +416,10 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> GetTicketById(IRepository<Ticket> ticketRepo, int id, IMapper mapper)
+        public static async Task<IResult> GetTicketById(IRepository<Ticket> ticketRepo, int id)
         {
-            var tickets = await ticketRepo.GetWithIncludes(t => t.Customer, t => t.Screening, t => t.Screening.Movie);
+            var ticketsQuery = ticketRepo.GetWithIncludes(t => t.Customer);
+            var tickets = await ticketsQuery.Include(t => t.Customer).Include(t => t.Screening).ThenInclude(s => s.Movie).ToListAsync();
             var ticket = tickets.FirstOrDefault(s => s.Id == id);
 
             if (ticket == null) return TypedResults.NotFound($"No Ticket found for id {id}");
@@ -425,7 +436,7 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static async Task<IResult> CreateTicket(IRepository<Ticket> ticketRepo, TicketPost model, IMapper mapper)
+        public static async Task<IResult> CreateTicket(IRepository<Ticket> ticketRepo, TicketPost model)
         {
             if (model.CustomerId == null ||
                 model.SceeringId == null) return Results.BadRequest("Ticket's input was formatted wrong.");
@@ -437,6 +448,10 @@ namespace api_cinema_challenge.Endpoints
             };
 
             ticket = await ticketRepo.Insert(ticket);
+
+            var ticketsQuery = ticketRepo.GetWithIncludes(t => t.Customer);
+            var tickets = await ticketsQuery.Include(t => t.Customer).Include(t => t.Screening).ThenInclude(s => s.Movie).ToListAsync();
+            ticket = tickets.FirstOrDefault(s => s.Id == ticket.Id);
 
             var result = new TicketDTO
             {
@@ -450,7 +465,7 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static async Task<IResult> UpdateTicket(IRepository<Ticket> ticketRepo, int id, TicketPut model, IMapper mapper)
+        public static async Task<IResult> UpdateTicket(IRepository<Ticket> ticketRepo, int id, TicketPut model)
         {
             if (model.CustomerId == null ||
                 model.SceeringId == null) return Results.BadRequest("Ticket's input was formatted wrong.");
@@ -461,6 +476,10 @@ namespace api_cinema_challenge.Endpoints
             if (model.SceeringId != null) ticket.SceeringId = (int)model.SceeringId;
 
             ticket = await ticketRepo.Update(ticket);
+
+            var ticketsQuery = ticketRepo.GetWithIncludes(t => t.Customer);
+            var tickets = await ticketsQuery.Include(t => t.Customer).Include(t => t.Screening).ThenInclude(s => s.Movie).ToListAsync();
+            ticket = tickets.FirstOrDefault(s => s.Id == id);
 
             var result = new TicketDTO
             {
@@ -474,12 +493,14 @@ namespace api_cinema_challenge.Endpoints
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> DeleteTicket(IRepository<Ticket> ticketRepo, int id, IMapper mapper)
+        public static async Task<IResult> DeleteTicket(IRepository<Ticket> ticketRepo, int id)
         {
-            var ticket = await ticketRepo.GetById(id);
+            var ticketsQuery = ticketRepo.GetWithIncludes(t => t.Customer);
+            var tickets = await ticketsQuery.Include(t => t.Customer).Include(t => t.Screening).ThenInclude(s => s.Movie).ToListAsync();
+            var ticket = tickets.FirstOrDefault(s => s.Id == id);
             if (ticket == null) return Results.NotFound("Ticket not found");
 
-            ticket = await ticketRepo.Delete(ticket);
+            ticket = await ticketRepo.Delete(id);
 
             var result = new TicketDTO
             {

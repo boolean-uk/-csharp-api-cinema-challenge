@@ -25,7 +25,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.SeedCinemaApi();
+app.UseHttpsRedirection();
 app.ConfigureCinemaAPI();
 app.Run();
